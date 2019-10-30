@@ -1,17 +1,32 @@
+// took inspiration and some code from "Maze Game" by Adam McBride
+//http://www.openprocessing.org/sketch/476975
+//Licensed under Creative Commons Attribution ShareAlike
+//https://creativecommons.org/licenses/by-sa/3.0
+//https://creativecommons.org/licenses/GPL/2.0/
+
+
+
 int state=0;
 int x= 168;
 int y = 315;
-int initialTime;
-int interval = 1000;
-int totalTime = 60000;
+int totalTime = 60;
 int time;
+int last = 0;
+int m = 0;
 PImage maze;
 PImage winner;
 PImage loser;
 PImage mainscreen;
-float hit;
+float ouch;
 PFont font;
 String timeString = "000";
+import processing.sound.*;
+SoundFile game;
+String audioName = "gamme.aif";
+String path;
+
+
+
 
 
 
@@ -23,9 +38,13 @@ void setup() {
   mainscreen= loadImage ("mainscreen.jpg");
   maze= loadImage ("maze1.png");
   winner= loadImage ("winner.png");
-  initialTime = millis();
   loser= loadImage ("loser.png");
+  path = sketchPath(audioName);
+  game = new SoundFile(this, path);
+  game.play();
 }
+
+
 void draw() {
   switch (state) {
   case 0:
@@ -33,6 +52,12 @@ void draw() {
     break;
   case 1:
     date();
+    break;
+  case 2:
+    loser();
+    break;
+  case 3:
+    winner();
     break;
   }
 }
@@ -45,6 +70,14 @@ void keyPressed() {
     }
     break;
   case 1:
+    if (key == 'a') {
+      state = 0;
+    }
+  case 2:
+    if (key == 'a') {
+      state = 0;
+    }
+  case 3:
     if (key == 'a') {
       state = 0;
     }
@@ -64,48 +97,55 @@ void keyPressed() {
 }
 
 
-void begin() {
 
+void begin() {
   background(0, 200, 120);
   image(mainscreen, 0, 0);
 }
+
+void loser() {
+  background (loser);
+}
+
+void winner () {
+  background (winner);
+}
+
+
+
 void date() {
+  m=0;
   background(maze);
-
-
-  hit = red(get(x, y));
-
-  if (hit == 0) 
-  {
-    println("ouchies!");
-    x = 168;
-    y = 315;
-  }
-
-
-  image(maze, 0, 0);
-  if (millis() - initialTime > interval)
-  {
-    time = int(millis()/1000);
-    timeString = nf(time, 3);
-    initialTime = millis();
-  }
-
-  text(timeString + " sec", 500, 100);
-  if (millis() >= totalTime)
-  {
-    background(loser);
-  }
-
+  ouch = red(get(x, y));
   ellipseMode(CENTER);
   pushMatrix();
   translate(x, y);
   fill (3, 252, 7);
   ellipse(0, 0, 8, 8);
   popMatrix();
-
-
-  if (y > 130 && x > 360) {
-    background(winner);
+  if (ouch == 0) 
+  {
+    println("ouchies!");
+    x = 168;
+    y = 315;
+  }
+  m = totalTime- millis()/1000;
+  text(m + "sec", 500, 100);
+  switch (state) {
+  case 1:
+    if (millis() > last+60000) {
+      last = millis();
+      state=2;
+      x=168;
+      y=315;
+    }
+  }
+  switch (state) {
+  case 1:
+    if (y > 130 && x > 360) {
+      state=3;
+      x= 168;
+      y= 315;
+    }
   }
 }
